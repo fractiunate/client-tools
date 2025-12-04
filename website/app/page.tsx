@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { convertFavicon, ConversionResult, cleanupResults } from "@/lib/api";
-import { Sparkles, Loader2, Image, ArrowRight, Github } from "lucide-react";
+import { Sparkles, Loader2, Image, ArrowRight, Github, Coffee } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Home() {
@@ -97,14 +97,25 @@ export default function Home() {
               Fractiunates Favicon Converter
             </span>
           </div>
-          <a
-            href="https://github.com/fractiunate/favicon-converter"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
-          >
-            <Github className="h-5 w-5" />
-          </a>
+          <div className="flex items-center gap-3">
+            <a
+              href="https://buymeacoffee.com/fractiunate"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-zinc-500 hover:text-amber-500 transition-colors"
+              title="Buy me a coffee"
+            >
+              <Coffee className="h-5 w-5" />
+            </a>
+            <a
+              href="https://github.com/fractiunate/favicon-converter"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+            >
+              <Github className="h-5 w-5" />
+            </a>
+          </div>
         </div>
       </header>
 
