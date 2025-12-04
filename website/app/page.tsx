@@ -4,12 +4,13 @@ import { useState, useEffect } from "react";
 import { FileUpload } from "@/components/file-upload";
 import { FormatSelector } from "@/components/format-selector";
 import { ConversionResults } from "@/components/conversion-results";
+import { PageLayout } from "@/components/page-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { convertFavicon, ConversionResult, cleanupResults } from "@/lib/api";
-import { Sparkles, Loader2, Image, ArrowRight, Github, Coffee } from "lucide-react";
+import { Sparkles, Loader2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Home() {
@@ -85,41 +86,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-zinc-50 to-white dark:from-zinc-950 dark:to-black">
-      {/* Header */}
-      <header className="border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-black/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
-              <Image className="h-4 w-4 text-white" />
-            </div>
-            <span className="font-semibold text-zinc-900 dark:text-zinc-100">
-              Fractiunates Favicon Converter
-            </span>
-          </div>
-          <div className="flex items-center gap-3">
-            <a
-              href="https://buymeacoffee.com/fractiunate"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-zinc-500 hover:text-amber-500 transition-colors"
-              title="Buy me a coffee"
-            >
-              <Coffee className="h-5 w-5" />
-            </a>
-            <a
-              href="https://github.com/fractiunate/favicon-converter"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
-              title="github/fractiunate/favicon-converter"
-            >
-              <Github className="h-5 w-5" />
-            </a>
-          </div>
-        </div>
-      </header>
-
+    <PageLayout toolId="favicon-converter">
       {/* Main content */}
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         {/* Hero section */}
@@ -257,19 +224,12 @@ export default function Home() {
             description="No sign-up required. Convert your images instantly with no limits."
           />
           <FeatureCard
-            title="Best Quality"
-            description="Optimized output for crisp favicons at every size."
+            title="100% Private"
+            description="Everything runs in your browser. Your files never leave your device."
           />
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="border-t border-zinc-200 dark:border-zinc-800 mt-16">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center text-sm text-zinc-500 dark:text-zinc-400">
-          <p>© {new Date().getFullYear()} Fractiunate. All rights reserved.</p>
-        </div>
-      </footer>
-    </div>
+    </PageLayout>
   );
 }
 
