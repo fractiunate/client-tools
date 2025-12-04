@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   output: "export",
   distDir: "dist",
-  basePath: "/file-converter"
+  basePath: "/favicon-converter"
 };
 
 export default nextConfig;
