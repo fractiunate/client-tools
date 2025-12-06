@@ -103,6 +103,7 @@ export default function FaviconConverterPage() {
                         </span>
                     </h1>
                     <p className="text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">
+                        And Vice Versa.
                         Generate all the favicon formats you need in seconds. ICO, PNG, SVG,
                         Apple Touch Icons, and more.
                     </p>
