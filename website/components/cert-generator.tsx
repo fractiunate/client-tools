@@ -66,7 +66,7 @@ import {
     validateSubject,
     validateSANs,
     validateValidity,
-} from "@/lib/cert";
+} from "@/services/cert";
 
 // ============ Main Component ============
 

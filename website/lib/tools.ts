@@ -11,7 +11,7 @@ export const tools: Tool[] = [
     {
         id: "favicon-converter",
         name: "Favicon Converter",
-        description: "Convert images to all favicon formats",
+        description: "Convert images to ICO, PNG, Apple Touch Icons & Android Chrome icons",
         icon: "Image",
         href: "/favicon-converter",
         available: true,
@@ -19,7 +19,7 @@ export const tools: Tool[] = [
     {
         id: "qr-generator",
         name: "QR Code Generator",
-        description: "Generate QR codes from text or URLs",
+        description: "Generate QR codes for text, URLs, WiFi & vCards with custom colors",
         icon: "QrCode",
         href: "/qr-generator",
         available: true,
@@ -27,18 +27,18 @@ export const tools: Tool[] = [
     {
         id: "cert-generator",
         name: "TLS Certificate Generator",
-        description: "Generate self-signed TLS certificates",
+        description: "Generate self-signed TLS/SSL certificates with RSA or ECDSA keys",
         icon: "ShieldCheck",
         href: "/cert-generator",
         available: true,
     },
     {
         id: "json-formatter",
-        name: "JSON Formatter",
-        description: "Format and validate JSON",
+        name: "JSON & YAML Formatter",
+        description: "Format, validate & convert between JSON and YAML formats",
         icon: "Braces",
         href: "/json-formatter",
-        available: false,
+        available: true,
     },
     {
         id: "image-compressor",

@@ -13,9 +13,34 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteUrl = "https://fractiunate.me/client-tools";
+
 export const metadata: Metadata = {
-  title: "Fractiunates Favicon Converter - Generate All Favicon Formats",
-  description: "Convert your images to all favicon formats including ICO, PNG, SVG, Apple Touch Icons, and Android Chrome icons.",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "Client-Side Tools | Fractiunate",
+    template: "%s | Client-Side Tools",
+  },
+  description: "Free browser-based developer tools. Favicon converter, QR code generator, TLS certificate generator, JSON/YAML formatter. 100% private - no uploads, no servers.",
+  keywords: ["developer tools", "favicon converter", "QR code generator", "TLS certificates", "JSON formatter", "YAML formatter", "client-side", "privacy"],
+  authors: [{ name: "Fractiunate" }],
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: siteUrl,
+    siteName: "Client-Side Tools",
+    title: "Client-Side Tools | Fractiunate",
+    description: "Free browser-based developer tools. Favicon converter, QR code generator, TLS certificate generator, JSON/YAML formatter. 100% private - no uploads, no servers.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Client-Side Tools | Fractiunate",
+    description: "Free browser-based developer tools. Favicon converter, QR code generator, TLS certificate generator, JSON/YAML formatter. 100% private.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
