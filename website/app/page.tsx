@@ -11,6 +11,7 @@ import {
   Palette,
   KeyRound,
   Wrench,
+  ShieldCheck,
   LucideIcon,
   ArrowRight,
   Sparkles,
@@ -25,6 +26,7 @@ const iconMap: Record<string, LucideIcon> = {
   Palette,
   KeyRound,
   Wrench,
+  ShieldCheck,
 };
 
 export default function OverviewPage() {

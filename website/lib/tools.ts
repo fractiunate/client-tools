@@ -2,7 +2,7 @@ export interface Tool {
     id: string;
     name: string;
     description: string;
-    icon: "Image" | "QrCode" | "Braces" | "FileArchive" | "Palette" | "KeyRound" | "Wrench";
+    icon: "Image" | "QrCode" | "Braces" | "FileArchive" | "Palette" | "KeyRound" | "Wrench" | "ShieldCheck";
     href: string;
     available: boolean;
 }
@@ -22,6 +22,14 @@ export const tools: Tool[] = [
         description: "Generate QR codes from text or URLs",
         icon: "QrCode",
         href: "/qr-generator",
+        available: true,
+    },
+    {
+        id: "cert-generator",
+        name: "TLS Certificate Generator",
+        description: "Generate self-signed TLS certificates",
+        icon: "ShieldCheck",
+        href: "/cert-generator",
         available: true,
     },
     {

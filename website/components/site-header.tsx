@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { Coffee, Github, ChevronDown, Image, QrCode, Braces, FileArchive, Palette, KeyRound, Wrench, LucideIcon } from "lucide-react";
+import { Coffee, Github, ChevronDown, Image, QrCode, Braces, FileArchive, Palette, KeyRound, Wrench, ShieldCheck, LucideIcon } from "lucide-react";
 import {
     Tooltip,
     TooltipContent,
@@ -21,6 +21,7 @@ const iconMap: Record<Tool["icon"], LucideIcon> = {
     Palette,
     KeyRound,
     Wrench,
+    ShieldCheck,
 };
 
 interface SiteHeaderProps {

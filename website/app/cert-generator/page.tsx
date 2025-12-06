@@ -1,0 +1,69 @@
+"use client";
+
+import { Sparkles } from "lucide-react";
+import { PageLayout } from "@/components/page-layout";
+import { CertGenerator } from "@/components/cert-generator";
+
+export default function CertGeneratorPage() {
+    return (
+        <PageLayout toolId="cert-generator">
+            {/* Main content */}
+            <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+                {/* Hero section */}
+                <div className="text-center mb-12">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 text-sm font-medium mb-4">
+                        <Sparkles className="h-4 w-4" />
+                        Free & Secure
+                    </div>
+                    <h1 className="text-4xl sm:text-5xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight mb-4">
+                        Generate
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-indigo-600">
+                            {" "}
+                            TLS Certificates
+                        </span>
+                    </h1>
+                    <p className="text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">
+                        Create self-signed certificates for development and testing.
+                        Generate root CAs, server certificates, and client certificates with full X.509v3 support.
+                    </p>
+                </div>
+
+                {/* Generator */}
+                <CertGenerator />
+
+                {/* Features section */}
+                <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    <FeatureCard
+                        title="Full X.509v3 Support"
+                        description="SANs, Key Usage, Extended Key Usage, Basic Constraints, and more"
+                    />
+                    <FeatureCard
+                        title="RSA & ECDSA"
+                        description="Support for RSA (2048-4096 bit) and ECDSA (P-256, P-384, P-521) keys"
+                    />
+                    <FeatureCard
+                        title="100% Client-Side"
+                        description="All cryptographic operations run locally. Private keys never leave your browser."
+                    />
+                </div>
+            </main>
+        </PageLayout>
+    );
+}
+
+function FeatureCard({
+    title,
+    description,
+}: {
+    title: string;
+    description: string;
+}) {
+    return (
+        <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 p-6 bg-white dark:bg-zinc-900/50">
+            <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
+                {title}
+            </h3>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">{description}</p>
+        </div>
+    );
+}
