@@ -43,7 +43,7 @@ export const tools: Tool[] = [
     {
         id: "cidr-calculator",
         name: "CIDR Calculator",
-        description: "Calculate subnets, detect overlaps & find available IP ranges",
+        description: "Calculate IPv4 & IPv6 subnets, detect overlaps & find available ranges",
         icon: "Network",
         href: "/cidr-calculator",
         available: true,

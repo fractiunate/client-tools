@@ -5,6 +5,12 @@ import {
     validateCIDR,
     validateCIDRAlignment,
     normalizeCIDRInput,
+    isIPv6,
+    expandIPv6,
+    compressIPv6,
+    validateIPv6Address,
+    validateIPv6CIDR,
+    validateUniversalCIDR,
 } from "./validation";
 
 describe("CIDR Validation", () => {
@@ -148,6 +154,97 @@ describe("CIDR Validation", () => {
         it("should trim whitespace", () => {
             expect(normalizeCIDRInput("  192.168.1.0  ")).toBe("192.168.1.0/32");
             expect(normalizeCIDRInput("  10.0.0.0/8  ")).toBe("10.0.0.0/8");
+        });
+    });
+
+    // ==================== IPv6 Tests ====================
+
+    describe("isIPv6", () => {
+        it("should detect IPv6 addresses", () => {
+            expect(isIPv6("2001:db8::1")).toBe(true);
+            expect(isIPv6("::1")).toBe(true);
+            expect(isIPv6("fe80::1")).toBe(true);
+        });
+
+        it("should not detect IPv4 addresses as IPv6", () => {
+            expect(isIPv6("192.168.1.1")).toBe(false);
+            expect(isIPv6("10.0.0.0")).toBe(false);
+        });
+    });
+
+    describe("expandIPv6", () => {
+        it("should expand :: notation", () => {
+            expect(expandIPv6("::1")).toBe("0000:0000:0000:0000:0000:0000:0000:0001");
+            expect(expandIPv6("::")).toBe("0000:0000:0000:0000:0000:0000:0000:0000");
+            expect(expandIPv6("2001:db8::1")).toBe("2001:0db8:0000:0000:0000:0000:0000:0001");
+        });
+
+        it("should expand full addresses", () => {
+            expect(expandIPv6("2001:db8:0:0:0:0:0:1")).toBe("2001:0db8:0000:0000:0000:0000:0000:0001");
+        });
+
+        it("should return null for invalid addresses", () => {
+            // Too many groups
+            expect(expandIPv6("2001:db8:0:0:0:0:0:0:1")).toBeNull();
+        });
+    });
+
+    describe("compressIPv6", () => {
+        it("should compress consecutive zeros", () => {
+            expect(compressIPv6("2001:0db8:0000:0000:0000:0000:0000:0001")).toBe("2001:db8::1");
+            expect(compressIPv6("0000:0000:0000:0000:0000:0000:0000:0001")).toBe("::1");
+            expect(compressIPv6("0000:0000:0000:0000:0000:0000:0000:0000")).toBe("::");
+        });
+
+        it("should preserve non-zero groups", () => {
+            expect(compressIPv6("2001:0db8:0001:0002:0003:0004:0005:0006")).toBe("2001:db8:1:2:3:4:5:6");
+        });
+    });
+
+    describe("validateIPv6Address", () => {
+        it("should accept valid IPv6 addresses", () => {
+            expect(validateIPv6Address("2001:db8::1").valid).toBe(true);
+            expect(validateIPv6Address("::1").valid).toBe(true);
+            expect(validateIPv6Address("fe80::1").valid).toBe(true);
+            expect(validateIPv6Address("::").valid).toBe(true);
+            expect(validateIPv6Address("2001:db8:0:0:0:0:0:1").valid).toBe(true);
+        });
+
+        it("should reject invalid IPv6 addresses", () => {
+            expect(validateIPv6Address("").valid).toBe(false);
+            expect(validateIPv6Address("gggg:db8::1").valid).toBe(false);
+            // Too many groups
+            expect(validateIPv6Address("2001:db8:0:0:0:0:0:0:1").valid).toBe(false);
+        });
+    });
+
+    describe("validateIPv6CIDR", () => {
+        it("should accept valid IPv6 CIDR", () => {
+            expect(validateIPv6CIDR("2001:db8::/32").valid).toBe(true);
+            expect(validateIPv6CIDR("::1/128").valid).toBe(true);
+            expect(validateIPv6CIDR("fe80::/10").valid).toBe(true);
+        });
+
+        it("should accept IPv6 without prefix as /128", () => {
+            expect(validateIPv6CIDR("2001:db8::1").valid).toBe(true);
+            expect(validateIPv6CIDR("::1").valid).toBe(true);
+        });
+
+        it("should reject invalid IPv6 CIDR", () => {
+            expect(validateIPv6CIDR("2001:db8::/129").valid).toBe(false);
+            expect(validateIPv6CIDR("2001:db8::/-1").valid).toBe(false);
+        });
+    });
+
+    describe("validateUniversalCIDR", () => {
+        it("should validate IPv4 CIDR", () => {
+            expect(validateUniversalCIDR("192.168.1.0/24").valid).toBe(true);
+            expect(validateUniversalCIDR("10.0.0.0").valid).toBe(true);
+        });
+
+        it("should validate IPv6 CIDR", () => {
+            expect(validateUniversalCIDR("2001:db8::/32").valid).toBe(true);
+            expect(validateUniversalCIDR("::1").valid).toBe(true);
         });
     });
 });

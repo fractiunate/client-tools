@@ -212,8 +212,8 @@ describe("CIDR Calculator", () => {
         it("should include host counts in suggestions", () => {
             const suggestions = suggestRanges([]);
             for (const suggestion of suggestions) {
-                expect(suggestion.totalHosts).toBeGreaterThan(0);
-                expect(suggestion.usableHosts).toBeGreaterThan(0);
+                expect(parseInt(suggestion.totalHosts, 10)).toBeGreaterThan(0);
+                expect(parseInt(suggestion.usableHosts, 10)).toBeGreaterThan(0);
             }
         });
     });

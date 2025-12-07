@@ -1,5 +1,7 @@
 // CIDR Calculator Types
 
+export type IPVersion = 4 | 6;
+
 export interface CIDRRange {
     id: string;
     cidr: string;
@@ -9,12 +11,13 @@ export interface CIDRRange {
     lastUsable: string;
     subnetMask: string;
     wildcardMask: string;
-    totalHosts: number;
-    usableHosts: number;
+    totalHosts: string;
+    usableHosts: string;
     prefixLength: number;
     ipClass: string;
     isPrivate: boolean;
     binaryNetwork: string;
+    ipVersion: IPVersion;
 }
 
 export interface CIDROverlap {
@@ -28,8 +31,8 @@ export interface CIDROverlap {
 export interface SuggestedRange {
     cidr: string;
     reason: string;
-    totalHosts: number;
-    usableHosts: number;
+    totalHosts: string;
+    usableHosts: string;
 }
 
 export interface CIDRValidationResult {
@@ -41,4 +44,13 @@ export interface ParsedCIDR {
     ip: number[];
     prefixLength: number;
     networkInt: number;
+    ipVersion: IPVersion;
+}
+
+// IPv6 uses string representation for the 128-bit values
+export interface ParsedIPv6CIDR {
+    groups: number[];
+    prefixLength: number;
+    networkHex: string;
+    ipVersion: 6;
 }

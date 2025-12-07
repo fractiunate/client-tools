@@ -11,12 +11,41 @@ import {
     calculateTotalHosts,
     calculateUsableHosts,
     prefixToMask,
+    parseIPv6,
+    ipv6GroupsToHex,
+    getIPv6NetworkHex,
+    getIPv6BroadcastHex,
 } from "./utils";
+import { isIPv6 } from "./validation";
 
 /**
- * Check if two CIDR ranges overlap
+ * Compare two hex strings (for IPv6 comparison)
+ */
+function compareHex(a: string, b: string): number {
+    if (a.length !== b.length) return a.length - b.length;
+    return a.localeCompare(b);
+}
+
+/**
+ * Check if two CIDR ranges overlap (works for both IPv4 and IPv6)
  */
 export function checkOverlap(range1: CIDRRange, range2: CIDRRange): CIDROverlap | null {
+    // Both ranges must be the same IP version
+    if (range1.ipVersion !== range2.ipVersion) {
+        return null;
+    }
+
+    if (range1.ipVersion === 6) {
+        return checkIPv6Overlap(range1, range2);
+    }
+
+    return checkIPv4Overlap(range1, range2);
+}
+
+/**
+ * Check IPv4 overlap
+ */
+function checkIPv4Overlap(range1: CIDRRange, range2: CIDRRange): CIDROverlap | null {
     const parsed1 = parseCIDR(range1.cidr);
     const parsed2 = parseCIDR(range2.cidr);
 
@@ -51,6 +80,66 @@ export function checkOverlap(range1: CIDRRange, range2: CIDRRange): CIDROverlap 
     if (
         (network1Start <= network2End && network1End >= network2Start) ||
         (network2Start <= network1End && network2End >= network1Start)
+    ) {
+        return {
+            range1Id: range1.id,
+            range2Id: range2.id,
+            range1Cidr: range1.cidr,
+            range2Cidr: range2.cidr,
+            overlapType: "partial",
+        };
+    }
+
+    return null;
+}
+
+/**
+ * Check IPv6 overlap using hex string comparison
+ */
+function checkIPv6Overlap(range1: CIDRRange, range2: CIDRRange): CIDROverlap | null {
+    const lastSlash1 = range1.cidr.lastIndexOf("/");
+    const lastSlash2 = range2.cidr.lastIndexOf("/");
+    const ip1 = range1.cidr.substring(0, lastSlash1);
+    const ip2 = range2.cidr.substring(0, lastSlash2);
+    const prefix1 = parseInt(range1.cidr.substring(lastSlash1 + 1), 10);
+    const prefix2 = parseInt(range2.cidr.substring(lastSlash2 + 1), 10);
+
+    const groups1 = parseIPv6(ip1);
+    const groups2 = parseIPv6(ip2);
+    const hex1 = ipv6GroupsToHex(groups1);
+    const hex2 = ipv6GroupsToHex(groups2);
+
+    const network1Start = getIPv6NetworkHex(hex1, prefix1);
+    const network1End = getIPv6BroadcastHex(network1Start, prefix1);
+    const network2Start = getIPv6NetworkHex(hex2, prefix2);
+    const network2End = getIPv6BroadcastHex(network2Start, prefix2);
+
+    // Check if range1 contains range2
+    if (compareHex(network1Start, network2Start) <= 0 && compareHex(network1End, network2End) >= 0) {
+        return {
+            range1Id: range1.id,
+            range2Id: range2.id,
+            range1Cidr: range1.cidr,
+            range2Cidr: range2.cidr,
+            overlapType: "contains",
+        };
+    }
+
+    // Check if range2 contains range1
+    if (compareHex(network2Start, network1Start) <= 0 && compareHex(network2End, network1End) >= 0) {
+        return {
+            range1Id: range1.id,
+            range2Id: range2.id,
+            range1Cidr: range1.cidr,
+            range2Cidr: range2.cidr,
+            overlapType: "contained",
+        };
+    }
+
+    // Check for partial overlap
+    if (
+        (compareHex(network1Start, network2End) <= 0 && compareHex(network1End, network2Start) >= 0) ||
+        (compareHex(network2Start, network1End) <= 0 && compareHex(network2End, network1Start) >= 0)
     ) {
         return {
             range1Id: range1.id,

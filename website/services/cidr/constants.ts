@@ -1,5 +1,6 @@
 // CIDR Calculator Constants
 
+// IPv4 Constants
 export const PRIVATE_RANGES = [
     { start: "10.0.0.0", end: "10.255.255.255", cidr: "10.0.0.0/8", name: "Class A Private" },
     { start: "172.16.0.0", end: "172.31.255.255", cidr: "172.16.0.0/12", name: "Class B Private" },
@@ -42,3 +43,30 @@ export const MAX_IP_VALUE = 255;
 export const IP_OCTETS = 4;
 export const BITS_PER_OCTET = 8;
 export const TOTAL_IP_BITS = 32;
+
+// IPv6 Constants
+export const IPV6_GROUPS = 8;
+export const IPV6_BITS_PER_GROUP = 16;
+export const IPV6_TOTAL_BITS = 128;
+export const IPV6_MAX_PREFIX_LENGTH = 128;
+export const IPV6_MAX_GROUP_VALUE = 0xFFFF;
+
+export const IPV6_PRIVATE_RANGES = [
+    { start: "fc00::", end: "fdff:ffff:ffff:ffff:ffff:ffff:ffff:ffff", cidr: "fc00::/7", name: "Unique Local Address (ULA)" },
+    { start: "fe80::", end: "febf:ffff:ffff:ffff:ffff:ffff:ffff:ffff", cidr: "fe80::/10", name: "Link-Local" },
+] as const;
+
+export const IPV6_RESERVED_RANGES = [
+    { start: "::", end: "::", name: "Unspecified" },
+    { start: "::1", end: "::1", name: "Loopback" },
+    { start: "ff00::", end: "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff", name: "Multicast" },
+    { start: "2001:db8::", end: "2001:db8:ffff:ffff:ffff:ffff:ffff:ffff", name: "Documentation" },
+] as const;
+
+export const IPV6_COMMON_PREFIX_LENGTHS = [
+    { prefix: 32, name: "/32 (RIR allocation)", hosts: "79228162514264337593543950336" },
+    { prefix: 48, name: "/48 (Site prefix)", hosts: "1208925819614629174706176" },
+    { prefix: 56, name: "/56 (Typical ISP allocation)", hosts: "4722366482869645213696" },
+    { prefix: 64, name: "/64 (Single subnet)", hosts: "18446744073709551616" },
+    { prefix: 128, name: "/128 (Single host)", hosts: "1" },
+] as const;
