@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { ZenModeProvider } from "@/lib/zen-mode";
 import { WorkspaceProvider } from "@/lib/workspace";
+import { PomodoroProvider } from "@/lib/pomodoro-context";
+import { GlobalPomodoroPlaybar } from "@/components/global-pomodoro-playbar";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -57,8 +59,11 @@ export default function RootLayout({
       >
         <ZenModeProvider>
           <WorkspaceProvider>
-            {children}
-            <Toaster richColors position="bottom-right" />
+            <PomodoroProvider>
+              {children}
+              <GlobalPomodoroPlaybar />
+              <Toaster richColors position="bottom-right" />
+            </PomodoroProvider>
           </WorkspaceProvider>
         </ZenModeProvider>
       </body>

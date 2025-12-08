@@ -2,7 +2,7 @@ export interface Tool {
     id: string;
     name: string;
     description: string;
-    icon: "Image" | "QrCode" | "Braces" | "FileArchive" | "Palette" | "KeyRound" | "Wrench" | "ShieldCheck" | "Network";
+    icon: "Image" | "QrCode" | "Braces" | "FileArchive" | "Palette" | "KeyRound" | "Wrench" | "ShieldCheck" | "Network" | "Timer";
     href: string;
     available: boolean;
 }
@@ -46,6 +46,14 @@ export const tools: Tool[] = [
         description: "Calculate IPv4 & IPv6 subnets, detect overlaps & find available ranges",
         icon: "Network",
         href: "/cidr-calculator",
+        available: true,
+    },
+    {
+        id: "pomodoro-timer",
+        name: "Pomodoro Timer",
+        description: "Boost productivity with customizable focus sessions and breaks",
+        icon: "Timer",
+        href: "/pomodoro-timer",
         available: true,
     },
     {

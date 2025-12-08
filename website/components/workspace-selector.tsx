@@ -67,9 +67,12 @@ export function WorkspaceSelector() {
     const [deletingWorkspace, setDeletingWorkspace] = useState<{ id: string; name: string } | null>(null);
     const [nameError, setNameError] = useState<string | null>(null);
 
+    // Get existing workspace names for duplicate validation
+    const existingNames = workspaces.map((ws) => ws.name);
+
     // Create workspace handler
     const handleCreate = useCallback(() => {
-        const validation = validateWorkspaceName(newWorkspaceName);
+        const validation = validateWorkspaceName(newWorkspaceName, existingNames);
         if (!validation.valid) {
             setNameError(validation.error || "Invalid name");
             return;
@@ -85,13 +88,17 @@ export function WorkspaceSelector() {
         } catch (error) {
             setNameError(error instanceof Error ? error.message : "Failed to create workspace");
         }
-    }, [newWorkspaceName, createWorkspace, selectWorkspace]);
+    }, [newWorkspaceName, createWorkspace, existingNames]);
 
     // Rename workspace handler
     const handleRename = useCallback(() => {
         if (!editingWorkspace) return;
 
-        const validation = validateWorkspaceName(editingWorkspace.name);
+        // Exclude current workspace name from duplicate check
+        const otherNames = workspaces
+            .filter((ws) => ws.id !== editingWorkspace.id)
+            .map((ws) => ws.name);
+        const validation = validateWorkspaceName(editingWorkspace.name, otherNames);
         if (!validation.valid) {
             setNameError(validation.error || "Invalid name");
             return;
@@ -102,7 +109,7 @@ export function WorkspaceSelector() {
         setIsRenameDialogOpen(false);
         setEditingWorkspace(null);
         setNameError(null);
-    }, [editingWorkspace, renameWorkspace]);
+    }, [editingWorkspace, renameWorkspace, workspaces]);
 
     // Delete workspace handler
     const handleDelete = useCallback(() => {

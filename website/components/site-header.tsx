@@ -15,6 +15,7 @@ import {
     ShieldCheck,
     Network,
     Focus,
+    Timer,
     LucideIcon,
 } from "lucide-react";
 import { WorkspaceSelector } from "@/components/workspace-selector";
@@ -45,6 +46,7 @@ const iconMap: Record<Tool["icon"], LucideIcon> = {
     Wrench,
     ShieldCheck,
     Network,
+    Timer,
 };
 
 interface SiteHeaderProps {
@@ -145,7 +147,7 @@ export function SiteHeader({ currentToolId }: SiteHeaderProps) {
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <a
-                                    href="https://github.com/fractiunate/favicon-converter"
+                                    href="https://github.com/fractiunate/client-tools"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
@@ -154,7 +156,7 @@ export function SiteHeader({ currentToolId }: SiteHeaderProps) {
                                 </a>
                             </TooltipTrigger>
                             <TooltipContent>
-                                <p>github/fractiunate/favicon-converter</p>
+                                <p>github/fractiunate/client-tools</p>
                             </TooltipContent>
                         </Tooltip>
                     </TooltipProvider>
