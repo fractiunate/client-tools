@@ -14,14 +14,14 @@ export const FEATURE_FLAGS = {
      * - Shows/hides global playbar
      * - Enables/disables Pomodoro context provider
      */
-    POMODORO_ENABLED: false,
+    POMODORO_ENABLED: true,
 
     /**
      * Enable the Workspaces feature
      * - Shows/hides workspace selector in header
      * - Enables/disables workspace persistence
      */
-    WORKSPACES_ENABLED: false,
+    WORKSPACES_ENABLED: true,
 
     /**
      * Enable Zen Mode feature
