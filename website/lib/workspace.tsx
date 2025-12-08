@@ -272,12 +272,31 @@ export function useWorkspace() {
 }
 
 /**
+ * Safe version of useWorkspace that returns null if not within a provider
+ * Use this when the component might render outside of WorkspaceProvider
+ */
+export function useWorkspaceSafe() {
+    const context = useContext(WorkspaceContext);
+    return context ?? null;
+}
+
+/**
  * Hook for tools to easily access their workspace data
  */
 export function useToolWorkspace<T extends ToolData>(toolId: string) {
-    const { activeWorkspace, getToolData, setToolData, updateToolData, clearToolData, isLoaded } = useWorkspace();
+    const context = useContext(WorkspaceContext);
 
-    const data = getToolData<T>(toolId);
+    // Return null-safe defaults if not within provider
+    const isWithinProvider = context !== undefined;
+
+    const activeWorkspace = context?.activeWorkspace ?? null;
+    const getToolData = context?.getToolData ?? (() => null);
+    const setToolData = context?.setToolData ?? (() => { });
+    const updateToolData = context?.updateToolData ?? (() => { });
+    const clearToolData = context?.clearToolData ?? (() => { });
+    const isLoaded = context?.isLoaded ?? true;
+
+    const data = isWithinProvider ? getToolData<T>(toolId) : null;
     const isActive = activeWorkspace !== null;
     const workspaceId = activeWorkspace?.id || null;
 

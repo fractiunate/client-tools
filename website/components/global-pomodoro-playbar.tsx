@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Play, Pause, SkipForward, RotateCcw, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -108,9 +109,18 @@ export function GlobalPomodoroPlaybar() {
                         <span className="text-sm font-medium truncate hidden sm:inline">
                             {sessionInfo.label}
                         </span>
-                        <Badge variant="secondary" className="text-xs hidden md:flex">
-                            {session.completedPomodoros} 🍅
-                        </Badge>
+                        <TooltipProvider delayDuration={300}>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Link href="/pomodoro-timer">
+                                        <Badge variant="secondary" className="text-xs hidden md:flex cursor-pointer hover:bg-secondary/80 transition-colors">
+                                            {session.completedPomodoros} 🍅
+                                        </Badge>
+                                    </Link>
+                                </TooltipTrigger>
+                                <TooltipContent side="top">Go to Pomodoro Timer</TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
                     </div>
 
                     {/* Center: Controls */}

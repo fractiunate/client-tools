@@ -33,7 +33,8 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
-import { usePomodoroContext } from "@/lib/pomodoro-context";
+import { usePomodoroContextSafe } from "@/lib/pomodoro-context";
+import { FEATURE_FLAGS } from "@/lib/feature-flags";
 import { cn } from "@/lib/utils";
 
 import {
@@ -50,6 +51,25 @@ import {
 } from "@/services/pomodoro";
 
 export function PomodoroTimer() {
+    const pomodoro = usePomodoroContextSafe();
+
+    // Show message if feature is disabled
+    if (!FEATURE_FLAGS.POMODORO_ENABLED || !pomodoro) {
+        return (
+            <Card>
+                <CardContent className="pt-6">
+                    <div className="text-center py-12">
+                        <Timer className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                        <h3 className="text-lg font-semibold mb-2">Pomodoro Timer</h3>
+                        <p className="text-muted-foreground">
+                            This feature is currently disabled.
+                        </p>
+                    </div>
+                </CardContent>
+            </Card>
+        );
+    }
+
     const {
         settings,
         updateSetting,
@@ -68,7 +88,7 @@ export function PomodoroTimer() {
         selectSessionType,
         showPlaybar,
         togglePlaybar,
-    } = usePomodoroContext();
+    } = pomodoro;
 
     // Get session icon
     const SessionIcon = session.type === "pomodoro" ? Timer : session.type === "shortBreak" ? Coffee : Battery;

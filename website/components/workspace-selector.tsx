@@ -37,7 +37,7 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { toast } from "sonner";
-import { useWorkspace } from "@/lib/workspace";
+import { useWorkspaceSafe } from "@/lib/workspace";
 import { cn } from "@/lib/utils";
 import {
     MAX_WORKSPACES,
@@ -46,6 +46,17 @@ import {
 } from "@/services/workspace";
 
 export function WorkspaceSelector() {
+    const workspace = useWorkspaceSafe();
+
+    // Don't render anything if workspace context is not available
+    if (!workspace) {
+        return null;
+    }
+
+    return <WorkspaceSelectorInner workspace={workspace} />;
+}
+
+function WorkspaceSelectorInner({ workspace }: { workspace: NonNullable<ReturnType<typeof useWorkspaceSafe>> }) {
     const {
         activeWorkspace,
         workspaces,
@@ -56,7 +67,7 @@ export function WorkspaceSelector() {
         deleteWorkspace,
         exportWorkspace,
         importWorkspace,
-    } = useWorkspace();
+    } = workspace;
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);

@@ -5,6 +5,7 @@ import { ZenModeProvider } from "@/lib/zen-mode";
 import { WorkspaceProvider } from "@/lib/workspace";
 import { PomodoroProvider } from "@/lib/pomodoro-context";
 import { GlobalPomodoroPlaybar } from "@/components/global-pomodoro-playbar";
+import { FEATURE_FLAGS } from "@/lib/feature-flags";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -52,19 +53,37 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Build the provider tree based on feature flags
+  let content = (
+    <>
+      {children}
+      <Toaster richColors position="bottom-right" />
+    </>
+  );
+
+  // Wrap with PomodoroProvider if enabled
+  if (FEATURE_FLAGS.POMODORO_ENABLED) {
+    content = (
+      <PomodoroProvider>
+        {children}
+        <GlobalPomodoroPlaybar />
+        <Toaster richColors position="bottom-right" />
+      </PomodoroProvider>
+    );
+  }
+
+  // Wrap with WorkspaceProvider if enabled
+  if (FEATURE_FLAGS.WORKSPACES_ENABLED) {
+    content = <WorkspaceProvider>{content}</WorkspaceProvider>;
+  }
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ZenModeProvider>
-          <WorkspaceProvider>
-            <PomodoroProvider>
-              {children}
-              <GlobalPomodoroPlaybar />
-              <Toaster richColors position="bottom-right" />
-            </PomodoroProvider>
-          </WorkspaceProvider>
+          {content}
         </ZenModeProvider>
       </body>
     </html>

@@ -110,6 +110,11 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
         completedPomodoros: 0,
     }));
 
+    // Session counter to force timer effect to re-run when session changes
+    // This is needed because when auto-start is enabled, state goes from "running" to "running"
+    // and React won't detect a change
+    const [sessionCounter, setSessionCounter] = useState(0);
+
     // UI state
     const [showPlaybar, setShowPlaybar] = useState(false);
 
@@ -302,6 +307,10 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
             state: shouldAutoStart ? "running" : "paused",
             completedPomodoros: newCompletedPomodoros,
         });
+
+        // Increment session counter to force timer effect to re-run
+        // This is critical for auto-start when state stays "running"
+        setSessionCounter((prev) => prev + 1);
     }, [settings]);
 
     // Timer logic
@@ -350,7 +359,9 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
                 clearInterval(timerRef.current);
             }
         };
-    }, [session.state, handleSessionComplete]);
+        // sessionCounter ensures this effect re-runs when a new session starts with auto-start
+        // (when state stays "running" but we need a new interval)
+    }, [session.state, sessionCounter, handleSessionComplete]);
 
     // Update document title when timer is running
     useEffect(() => {
