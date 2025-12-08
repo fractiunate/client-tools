@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 
 interface ZenModeContextType {
     zenMode: boolean;
+    isLoaded: boolean;
     toggleZenMode: () => void;
 }
 
@@ -13,7 +14,7 @@ const ZEN_MODE_KEY = "zen-mode";
 
 export function ZenModeProvider({ children }: { children: ReactNode }) {
     const [zenMode, setZenMode] = useState(false);
-    const [mounted, setMounted] = useState(false);
+    const [isLoaded, setIsLoaded] = useState(false);
 
     // Load from localStorage on mount
     useEffect(() => {
@@ -21,22 +22,22 @@ export function ZenModeProvider({ children }: { children: ReactNode }) {
         if (stored === "true") {
             setZenMode(true);
         }
-        setMounted(true);
+        setIsLoaded(true);
     }, []);
 
     // Save to localStorage when changed
     useEffect(() => {
-        if (mounted) {
+        if (isLoaded) {
             localStorage.setItem(ZEN_MODE_KEY, zenMode.toString());
         }
-    }, [zenMode, mounted]);
+    }, [zenMode, isLoaded]);
 
     const toggleZenMode = () => {
         setZenMode((prev) => !prev);
     };
 
     return (
-        <ZenModeContext.Provider value={{ zenMode, toggleZenMode }}>
+        <ZenModeContext.Provider value={{ zenMode, isLoaded, toggleZenMode }}>
             {children}
         </ZenModeContext.Provider>
     );

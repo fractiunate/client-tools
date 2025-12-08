@@ -12,8 +12,11 @@ interface PageLayoutProps {
 
 export function PageLayout({ children, toolId }: PageLayoutProps) {
     const pomodoro = usePomodoroContextSafe();
-    const { zenMode } = useZenMode();
+    const { zenMode, isLoaded } = useZenMode();
     const showPlaybar = pomodoro?.showPlaybar ?? false;
+
+    // Only show footer after zen mode state is loaded to avoid flash
+    const showFooter = isLoaded && !zenMode;
 
     return (
         <div className={cn(
@@ -22,8 +25,8 @@ export function PageLayout({ children, toolId }: PageLayoutProps) {
         )}>
             <SiteHeader currentToolId={toolId} />
             {children}
-            {/* Footer - hidden in zen mode */}
-            {!zenMode && (
+            {/* Footer - hidden in zen mode, also hidden until state is loaded to avoid flash */}
+            {showFooter && (
                 <footer className="border-t border-zinc-200 dark:border-zinc-800 mt-16">
                     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-zinc-500 dark:text-zinc-400 py-8">
                         <p>
