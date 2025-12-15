@@ -32,14 +32,22 @@ export function PasswordGenerator() {
     const [entropy, setEntropy] = useState<number>(0);
     const [history, setHistory] = useState<GeneratedPassword[]>([]);
     const [showPassword, setShowPassword] = useState<boolean>(true);
+    const [showHistoryPasswords, setShowHistoryPasswords] = useState<Set<number>>(new Set());
     const [errors, setErrors] = useState<string[]>([]);
     const [copied, setCopied] = useState<boolean>(false);
+    const [hasLoadedData, setHasLoadedData] = useState<boolean>(false);
+    const [hasGeneratedInitial, setHasGeneratedInitial] = useState<boolean>(false);
 
-    // Load data from workspace or localStorage
+    // Load data from workspace or localStorage - only once
     useEffect(() => {
+        if (hasLoadedData) return;
+
+        let loadedOptions = DEFAULT_PASSWORD_OPTIONS;
+        let loadedHistory: GeneratedPassword[] = [];
+
         if (isActive && workspaceData) {
-            setOptions(workspaceData.options);
-            setHistory(workspaceData.generatedPasswords);
+            loadedOptions = workspaceData.options;
+            loadedHistory = workspaceData.generatedPasswords;
         } else {
             // Load from localStorage
             const savedOptions = localStorage.getItem(STORAGE_KEYS.PASSWORD_OPTIONS);
@@ -47,7 +55,7 @@ export function PasswordGenerator() {
 
             if (savedOptions) {
                 try {
-                    setOptions(JSON.parse(savedOptions));
+                    loadedOptions = JSON.parse(savedOptions);
                 } catch (e) {
                     console.error('Error loading password options:', e);
                 }
@@ -55,16 +63,30 @@ export function PasswordGenerator() {
 
             if (savedHistory) {
                 try {
-                    setHistory(JSON.parse(savedHistory));
+                    loadedHistory = JSON.parse(savedHistory);
                 } catch (e) {
                     console.error('Error loading password history:', e);
                 }
             }
         }
-    }, [isActive, workspaceData]);
 
-    // Save data to workspace or localStorage
-    const saveData = useCallback(() => {
+        setOptions(loadedOptions);
+        setHistory(loadedHistory);
+        setHasLoadedData(true);
+    }, [isActive, workspaceData, hasLoadedData]);
+
+    // Generate initial password - only after data is loaded and only once
+    useEffect(() => {
+        if (hasLoadedData && !hasGeneratedInitial) {
+            generatePassword();
+            setHasGeneratedInitial(true);
+        }
+    }, [hasLoadedData, hasGeneratedInitial]);
+
+    // Save data when relevant state changes - but only after initial load
+    useEffect(() => {
+        if (!hasLoadedData) return;
+
         const dataToSave: PasswordWorkspaceData = {
             generatedPasswords: history,
             options,
@@ -76,19 +98,9 @@ export function PasswordGenerator() {
             localStorage.setItem(STORAGE_KEYS.PASSWORD_OPTIONS, JSON.stringify(options));
             localStorage.setItem(STORAGE_KEYS.PASSWORD_HISTORY, JSON.stringify(history));
         }
-    }, [isActive, saveToWorkspace, options, history]);
+    }, [options, history, isActive, hasLoadedData]); // Remove saveToWorkspace dependency
 
-    // Save when options or history change
-    useEffect(() => {
-        saveData();
-    }, [saveData]);
-
-    // Generate initial password
-    useEffect(() => {
-        handleGenerate();
-    }, []);
-
-    const handleGenerate = () => {
+    const generatePassword = useCallback(() => {
         const validationErrors = validateOptions(options);
         setErrors(validationErrors);
 
@@ -110,6 +122,10 @@ export function PasswordGenerator() {
         } catch (error) {
             setErrors([error instanceof Error ? error.message : 'Failed to generate password']);
         }
+    }, [options]);
+
+    const handleGenerate = () => {
+        generatePassword();
     };
 
     const handleCopy = async () => {
@@ -124,6 +140,23 @@ export function PasswordGenerator() {
 
     const updateOption = (key: keyof PasswordOptions, value: boolean | number) => {
         setOptions(prev => ({ ...prev, [key]: value }));
+    };
+
+    const toggleHistoryPasswordVisibility = (index: number) => {
+        setShowHistoryPasswords(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(index)) {
+                newSet.delete(index);
+            } else {
+                newSet.add(index);
+            }
+            return newSet;
+        });
+    };
+
+    const handleCopyHistoryPassword = (password: string, event: React.MouseEvent) => {
+        event.stopPropagation(); // Prevent triggering the row click
+        navigator.clipboard.writeText(password);
     };
 
     const getStrengthColor = (strength: string) => {
@@ -217,10 +250,22 @@ export function PasswordGenerator() {
                 {/* Options */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>Password Options</CardTitle>
-                        <CardDescription>
-                            Customize your password generation settings
-                        </CardDescription>
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <CardTitle>Password Options</CardTitle>
+                                <CardDescription>
+                                    Customize your password generation settings
+                                </CardDescription>
+                            </div>
+                            <div className="text-right">
+                                <div className="text-2xl font-bold text-violet-600 dark:text-violet-400">
+                                    {PASSWORD_CONSTRAINTS.MAX_LENGTH}
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                    Max Length
+                                </div>
+                            </div>
+                        </div>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         {/* Length */}
@@ -232,14 +277,14 @@ export function PasswordGenerator() {
                                 id="length"
                                 type="range"
                                 min={PASSWORD_CONSTRAINTS.MIN_LENGTH}
-                                max={Math.min(PASSWORD_CONSTRAINTS.MAX_LENGTH, 64)}
+                                max={PASSWORD_CONSTRAINTS.MAX_LENGTH}
                                 value={options.length}
                                 onChange={(e) => updateOption('length', parseInt(e.target.value))}
                                 className="w-full"
                             />
                             <div className="flex justify-between text-xs text-muted-foreground">
                                 <span>{PASSWORD_CONSTRAINTS.MIN_LENGTH}</span>
-                                <span>64</span>
+                                <span>{PASSWORD_CONSTRAINTS.MAX_LENGTH}</span>
                             </div>
                         </div>
 
@@ -331,7 +376,7 @@ export function PasswordGenerator() {
                             Recent Passwords
                         </CardTitle>
                         <CardDescription>
-                            Recently generated passwords (click to copy)
+                            Recently generated passwords (masked by default)
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -344,12 +389,11 @@ export function PasswordGenerator() {
                                 {history.map((item, index) => (
                                     <div
                                         key={index}
-                                        className="flex items-center justify-between p-2 border rounded-md hover:bg-muted cursor-pointer"
-                                        onClick={() => navigator.clipboard.writeText(item.password)}
+                                        className="flex items-center gap-2 p-2 border rounded-md hover:bg-muted"
                                     >
                                         <div className="flex-1 min-w-0">
                                             <div className="font-mono text-sm truncate">
-                                                {showPassword ? item.password : '•'.repeat(item.password.length)}
+                                                {showHistoryPasswords.has(index) ? item.password : '•'.repeat(item.password.length)}
                                             </div>
                                             <div className="flex items-center gap-2 mt-1">
                                                 <Badge
@@ -363,7 +407,27 @@ export function PasswordGenerator() {
                                                 </span>
                                             </div>
                                         </div>
-                                        <Copy className="h-3 w-3 text-muted-foreground ml-2" />
+                                        <div className="flex items-center gap-1">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => toggleHistoryPasswordVisibility(index)}
+                                                className="h-8 w-8 p-0"
+                                            >
+                                                {showHistoryPasswords.has(index) ?
+                                                    <EyeOff className="h-3 w-3" /> :
+                                                    <Eye className="h-3 w-3" />
+                                                }
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={(e) => handleCopyHistoryPassword(item.password, e)}
+                                                className="h-8 w-8 p-0"
+                                            >
+                                                <Copy className="h-3 w-3" />
+                                            </Button>
+                                        </div>
                                     </div>
                                 ))}
                             </div>

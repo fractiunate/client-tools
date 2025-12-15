@@ -25,7 +25,7 @@ export default function PasswordGeneratorPage() {
                         <p className="text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">
                             Generate secure random passwords with customizable options including length, character types, and exclusions
                         </p>
-                        
+
                         {/* Quick stats */}
                         <div className="flex items-center justify-center gap-8 mt-8">
                             <div className="text-center">
