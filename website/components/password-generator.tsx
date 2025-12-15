@@ -24,7 +24,7 @@ import type {
 } from '@/services/password';
 
 export function PasswordGenerator() {
-    const { isActive, data: workspaceData, save: saveToWorkspace } = useToolWorkspace<PasswordWorkspaceData>('password-generator');
+    const { isActive, data: workspaceData, save: saveToWorkspace, workspaceId } = useToolWorkspace<PasswordWorkspaceData>('password-generator');
 
     const [options, setOptions] = useState<PasswordOptions>(DEFAULT_PASSWORD_OPTIONS);
     const [generatedPassword, setGeneratedPassword] = useState<string>('');
@@ -36,9 +36,8 @@ export function PasswordGenerator() {
     const [errors, setErrors] = useState<string[]>([]);
     const [copied, setCopied] = useState<boolean>(false);
     const [hasLoadedData, setHasLoadedData] = useState<boolean>(false);
-    const [hasGeneratedInitial, setHasGeneratedInitial] = useState<boolean>(false);
 
-    // Load data from workspace or localStorage - only once
+    // Load data from workspace only - reset to defaults when no workspace
     useEffect(() => {
         if (hasLoadedData) return;
 
@@ -46,59 +45,51 @@ export function PasswordGenerator() {
         let loadedHistory: GeneratedPassword[] = [];
 
         if (isActive && workspaceData) {
+            // Load from workspace
             loadedOptions = workspaceData.options;
             loadedHistory = workspaceData.generatedPasswords;
-        } else {
-            // Load from localStorage
-            const savedOptions = localStorage.getItem(STORAGE_KEYS.PASSWORD_OPTIONS);
-            const savedHistory = localStorage.getItem(STORAGE_KEYS.PASSWORD_HISTORY);
-
-            if (savedOptions) {
-                try {
-                    loadedOptions = JSON.parse(savedOptions);
-                } catch (e) {
-                    console.error('Error loading password options:', e);
-                }
-            }
-
-            if (savedHistory) {
-                try {
-                    loadedHistory = JSON.parse(savedHistory);
-                } catch (e) {
-                    console.error('Error loading password history:', e);
-                }
-            }
         }
+        // If no workspace is active, use defaults and don't load from localStorage
 
         setOptions(loadedOptions);
         setHistory(loadedHistory);
         setHasLoadedData(true);
-    }, [isActive, workspaceData, hasLoadedData]);
+    }, [isActive, workspaceData]);
 
-    // Generate initial password - only after data is loaded and only once
-    useEffect(() => {
-        if (hasLoadedData && !hasGeneratedInitial) {
-            generatePassword();
-            setHasGeneratedInitial(true);
-        }
-    }, [hasLoadedData, hasGeneratedInitial]);
-
-    // Save data when relevant state changes - but only after initial load
+    // Handle workspace activation/deactivation changes after initial load
+    const prevWorkspaceRef = React.useRef<{ isActive: boolean; workspaceId: string | null }>({ isActive, workspaceId });
     useEffect(() => {
         if (!hasLoadedData) return;
 
-        const dataToSave: PasswordWorkspaceData = {
-            generatedPasswords: history,
-            options,
-        };
+        const prevState = prevWorkspaceRef.current;
 
-        if (isActive) {
-            saveToWorkspace(dataToSave);
-        } else {
-            localStorage.setItem(STORAGE_KEYS.PASSWORD_OPTIONS, JSON.stringify(options));
-            localStorage.setItem(STORAGE_KEYS.PASSWORD_HISTORY, JSON.stringify(history));
+        // React to workspace activation/deactivation OR switching between different workspaces
+        if (prevState.isActive !== isActive || prevState.workspaceId !== workspaceId) {
+            if (isActive && workspaceData) {
+                // Switching to workspace or switching between workspaces - load workspace data
+                setOptions(workspaceData.options);
+                setHistory(workspaceData.generatedPasswords);
+                // Clear generated password display to show default message
+                setGeneratedPassword('');
+                setPasswordStrength('');
+                setEntropy(0);
+                // Clear visibility state when switching workspaces
+                setShowHistoryPasswords(new Set());
+            } else if (!isActive) {
+                // Switching to no workspace - reset to defaults
+                setOptions(DEFAULT_PASSWORD_OPTIONS);
+                setHistory([]);
+                // Clear any generated password display
+                setGeneratedPassword('');
+                setPasswordStrength('');
+                setEntropy(0);
+                // Clear visibility state
+                setShowHistoryPasswords(new Set());
+            }
+
+            prevWorkspaceRef.current = { isActive, workspaceId };
         }
-    }, [options, history, isActive, hasLoadedData]); // Remove saveToWorkspace dependency
+    }, [isActive, workspaceId, workspaceData, hasLoadedData]);
 
     const generatePassword = useCallback(() => {
         const validationErrors = validateOptions(options);
@@ -123,6 +114,21 @@ export function PasswordGenerator() {
             setErrors([error instanceof Error ? error.message : 'Failed to generate password']);
         }
     }, [options]);
+
+    // Save data only when workspace is active - no saving when no workspace selected
+    useEffect(() => {
+        if (!hasLoadedData) return;
+
+        if (isActive) {
+            // Save to workspace
+            const dataToSave: PasswordWorkspaceData = {
+                generatedPasswords: history,
+                options,
+            };
+            saveToWorkspace(dataToSave);
+        }
+        // When no workspace is active, don't save anywhere
+    }, [options, history, isActive, hasLoadedData]);
 
     const handleGenerate = () => {
         generatePassword();
@@ -176,11 +182,11 @@ export function PasswordGenerator() {
     };
 
     return (
-        <div className="max-w-4xl mx-auto space-y-6">
-            {/* Error Display */}
-            {errors.length > 0 && (
-                <Card className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/20">
-                    <CardContent className="p-4">
+        <Card className="max-w-4xl mx-auto">
+            <CardContent className="p-6 space-y-6">
+                {/* Error Display */}
+                {errors.length > 0 && (
+                    <div className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/20 border rounded-lg p-4">
                         <div className="space-y-1">
                             {errors.map((error, index) => (
                                 <p key={index} className="text-sm text-red-600 dark:text-red-400">
@@ -188,28 +194,24 @@ export function PasswordGenerator() {
                                 </p>
                             ))}
                         </div>
-                    </CardContent>
-                </Card>
-            )}
+                    </div>
+                )}
 
-            {/* Generated Password Display */}
-            <Card>
-                <CardHeader>
-                    <div className="flex items-center justify-between">
+                {/* Generated Password Display */}
+                <div className="space-y-4">
+                    <div className="flex items-start justify-between">
                         <div>
-                            <CardTitle>Generated Password</CardTitle>
-                            <CardDescription>
-                                {generatedPassword && (
-                                    <div className="flex items-center gap-2 mt-2">
-                                        <Badge variant="secondary" className={getStrengthColor(passwordStrength)}>
-                                            {formatStrength(passwordStrength)}
-                                        </Badge>
-                                        <span className="text-sm text-muted-foreground">
-                                            Entropy: {entropy} bits
-                                        </span>
-                                    </div>
-                                )}
-                            </CardDescription>
+                            <h3 className="text-lg font-semibold">Generated Password</h3>
+                            {generatedPassword && (
+                                <div className="flex items-center gap-2 mt-2">
+                                    <Badge variant="secondary" className={getStrengthColor(passwordStrength)}>
+                                        {formatStrength(passwordStrength)}
+                                    </Badge>
+                                    <span className="text-sm text-muted-foreground">
+                                        Entropy: {entropy} bits
+                                    </span>
+                                </div>
+                            )}
                         </div>
                         <div className="flex gap-2">
                             <Button
@@ -234,8 +236,6 @@ export function PasswordGenerator() {
                             </Button>
                         </div>
                     </div>
-                </CardHeader>
-                <CardContent>
                     <div className="p-4 bg-muted rounded-md font-mono text-lg break-all">
                         {generatedPassword ? (
                             showPassword ? generatedPassword : '•'.repeat(generatedPassword.length)
@@ -243,19 +243,19 @@ export function PasswordGenerator() {
                             <span className="text-muted-foreground">Click Generate to create a password</span>
                         )}
                     </div>
-                </CardContent>
-            </Card>
+                </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Options */}
-                <Card>
-                    <CardHeader>
+                <Separator />
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Options */}
+                    <div className="space-y-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <CardTitle>Password Options</CardTitle>
-                                <CardDescription>
+                                <h3 className="text-lg font-semibold">Password Options</h3>
+                                <p className="text-sm text-muted-foreground">
                                     Customize your password generation settings
-                                </CardDescription>
+                                </p>
                             </div>
                             <div className="text-right">
                                 <div className="text-2xl font-bold text-violet-600 dark:text-violet-400">
@@ -266,8 +266,7 @@ export function PasswordGenerator() {
                                 </div>
                             </div>
                         </div>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
+
                         {/* Length */}
                         <div className="space-y-2">
                             <Label htmlFor="length">
@@ -365,21 +364,20 @@ export function PasswordGenerator() {
                                 </div>
                             </div>
                         </div>
-                    </CardContent>
-                </Card>
+                    </div>
 
-                {/* History */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <History className="h-5 w-5" />
-                            Recent Passwords
-                        </CardTitle>
-                        <CardDescription>
-                            Recently generated passwords (masked by default)
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
+                    {/* History */}
+                    <div className="space-y-4">
+                        <div>
+                            <h3 className="text-lg font-semibold flex items-center gap-2">
+                                <History className="h-5 w-5" />
+                                Recent Passwords
+                            </h3>
+                            <p className="text-sm text-muted-foreground">
+                                Recently generated passwords (masked by default)
+                            </p>
+                        </div>
+
                         {history.length === 0 ? (
                             <p className="text-muted-foreground text-sm">
                                 No passwords generated yet
@@ -432,9 +430,9 @@ export function PasswordGenerator() {
                                 ))}
                             </div>
                         )}
-                    </CardContent>
-                </Card>
-            </div>
-        </div>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
     );
 }
