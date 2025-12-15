@@ -102,10 +102,11 @@ const allTools: ToolDefinition[] = [
     {
         id: "password-generator",
         name: "Password Generator",
-        description: "Generate secure random passwords",
+        description: "Generate secure random passwords with customizable options",
         icon: "KeyRound",
         href: "/password-generator",
-        available: false,
+        available: true,
+        featureFlag: "PASSWORD_GENERATOR_ENABLED",
     },
 ];
 

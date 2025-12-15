@@ -41,6 +41,12 @@ export const FEATURE_FLAGS = {
      * - Shows/hides AI Code Editor in tools list
      */
     CODE_EDITOR_ENABLED: true,
+
+    /**
+     * Enable the Password Generator feature
+     * - Shows/hides Password Generator in tools list
+     */
+    PASSWORD_GENERATOR_ENABLED: true,
 } as const;
 
 export type FeatureFlag = keyof typeof FEATURE_FLAGS;
